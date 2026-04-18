@@ -24,13 +24,16 @@ export async function generateMetadata({
     };
   }
 
+  // ЖЕСТКО ЗАДАЁМ ДОМЕН - без всяких условий и проверок
+  const fullImageUrl = `https://jandv-sneakers.onrender.com${product.image}`;
+
   return {
     title: `${product.name} | J&V Sneakers`,
     description: product.description,
     openGraph: {
       title: product.name,
       description: product.description,
-      images: [product.image],
+      images: [fullImageUrl],
     },
   };
 }
