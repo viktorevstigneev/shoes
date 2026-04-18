@@ -24,13 +24,34 @@ export async function generateMetadata({
     };
   }
 
+  // Базовый URL для продакшена
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://jandv-sneakers.onrender.com";
+
+  // Формируем абсолютный URL для картинки
+  const imageUrl = product.image.startsWith("http")
+    ? product.image
+    : `${baseUrl}${product.image}`;
+
   return {
     title: `${product.name} | J&V Sneakers`,
     description: product.description,
     openGraph: {
       title: product.name,
       description: product.description,
-      images: [product.image],
+      images: [imageUrl],
+      url: `${baseUrl}/catalog/${id}`,
+      siteName: "J&V Sneakers",
+      type: "product",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.description,
+      images: [imageUrl],
+    },
+    alternates: {
+      canonical: `${baseUrl}/catalog/${id}`,
     },
   };
 }
