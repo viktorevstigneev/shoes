@@ -2,7 +2,6 @@
 
 import { useRef, Suspense, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useScroll } from "framer-motion";
 import {
   OrbitControls,
   Environment,
@@ -14,69 +13,28 @@ import {
 import * as THREE from "three";
 import { useTheme } from "@/context/ThemeContext";
 
-// Компонент с 3D моделью
-function ShoeModel({ modelPath }: { modelPath: string }) {
+// Компонент с 3D моделькой
+function ShoeModel({ scrollProgress = 0 }) {
   const groupRef = useRef<THREE.Group>(null);
-  const { scrollYProgress } = useScroll();
-  const { theme } = useTheme();
 
-  // Загружаем GLB модель в зависимости от темы
-  const { scene } = useGLTF(modelPath);
+  // Загружаем модель
+  const { scene } = useGLTF("/shoes/n2.glb");
 
-  // Клонируем сцену, чтобы не мутировать оригинал
+  // Клонируем сцену
   const clonedScene = scene.clone();
 
   useFrame((state) => {
     if (groupRef.current) {
-      // Вращение при скролле (от начальной позиции)
-      const rotationY = scrollYProgress.get() * Math.PI * 2;
-      groupRef.current.rotation.y = rotationY;
+      // Вращение от скролла
+      const rotationY = scrollProgress * Math.PI * 2;
+      groupRef.current.rotation.y = rotationY + Math.PI; // + Math.PI это 180 градусов
 
-      // Добавляем начальный поворот на 180 градусов
-      groupRef.current.rotation.y += Math.PI;
-
-      // Наклон при скролле
-      groupRef.current.rotation.x =
-        Math.sin(scrollYProgress.get() * Math.PI) * 0.2;
+      // Наклон от скролла
+      groupRef.current.rotation.x = Math.sin(scrollProgress * Math.PI) * 0.2;
 
       // Плавное движение вверх-вниз
       groupRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.05;
     }
-  });
-
-  // Меняем материалы в зависимости от темы
-  useFrame(() => {
-    clonedScene.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        if (theme === "dark") {
-          // Затемняем для темной темы
-          if (child.material) {
-            if (Array.isArray(child.material)) {
-              child.material.forEach((mat) => {
-                mat.emissiveIntensity = 0.1;
-                mat.roughness = 0.6;
-              });
-            } else {
-              child.material.emissiveIntensity = 0.1;
-              child.material.roughness = 0.6;
-            }
-          }
-        } else {
-          // Делаем ярче для светлой темы
-          if (child.material) {
-            if (Array.isArray(child.material)) {
-              child.material.forEach((mat) => {
-                mat.emissiveIntensity = 0.2;
-                mat.roughness = 0.3;
-              });
-            } else {
-              child.material.emissiveIntensity = 0.2;
-              child.material.roughness = 0.3;
-            }
-          }
-        }
-      }
-    });
   });
 
   return (
@@ -86,26 +44,67 @@ function ShoeModel({ modelPath }: { modelPath: string }) {
   );
 }
 
+// Стекломорфный прелоадер
+function GlassLoader() {
+  return (
+    <Html center>
+      <div className="relative">
+        <div className="relative flex flex-col items-center justify-center gap-4">
+          <div className="relative w-20 h-20">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/30 to-pink-500/30 blur-xl animate-pulse" />
+            <div className="relative w-full h-full rounded-full backdrop-blur-2xl bg-white/20 dark:bg-white/10 border border-white/40 dark:border-white/20 shadow-2xl animate-spin-slow">
+              <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white/60 blur-[1px]" />
+              <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-white/40 blur-[1px]" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-transparent via-white/10 to-white/20" />
+            </div>
+            <div className="absolute inset-[-2px] rounded-full border-2 border-transparent border-t-purple-500/60 border-r-pink-500/60 animate-spin" />
+          </div>
+          <div className="flex gap-2">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 animate-bounce"
+                style={{
+                  animationDelay: `${i * 0.2}s`,
+                  animationDuration: "1s",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </Html>
+  );
+}
+
 // Основной компонент с Canvas
 export default function ThreeDShoe() {
   const { theme } = useTheme();
-  const [modelPath, setModelPath] = useState("/shoes/n3.glb");
+  const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Меняем модель при смене темы
+  // Отслеживаем скролл на странице
   useEffect(() => {
-    setModelPath(theme === "light" ? "/shoes/n2.glb" : "/shoes/n2.glb");
-  }, [theme]);
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const progress = maxScroll > 0 ? scrollY / maxScroll : 0;
+      setScrollProgress(progress);
+    };
 
-  // Предзагружаем обе модели
-  useEffect(() => {
-    useGLTF.preload("/shoes/n3.glb");
-    useGLTF.preload("/shoes/n2.glb");
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Вызываем сразу для начального значения
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Предзагружаем модель
+  useGLTF.preload("/shoes/n2.glb");
 
   return (
     <div className="w-full h-[500px] md:h-[600px] relative">
       <Canvas
-        shadows
+        style={{ width: "100%", height: "100%" }}
+        shadows={{ type: THREE.PCFShadowMap }}
         camera={{ position: [5, 3, 8], fov: 45 }}
         className="cursor-grab active:cursor-grabbing"
         gl={{ preserveDrawingBuffer: true }}
@@ -119,8 +118,7 @@ export default function ThreeDShoe() {
           position={[5, 5, 5]}
           intensity={1.2}
           castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
+          shadow-mapSize={{ width: 1024, height: 1024 }}
         />
 
         <pointLight
@@ -141,29 +139,14 @@ export default function ThreeDShoe() {
           color={theme === "light" ? "#3B82F6" : "#60A5FA"}
         />
 
-        {/* Подсветка снизу */}
         <pointLight position={[0, -2, 0]} intensity={0.4} color="#FBBF24" />
 
         {/* 3D Модель с загрузкой */}
-        <Suspense
-          key={modelPath}
-          fallback={
-            <Html center>
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                <p className="text-gray-600 dark:text-gray-400 font-medium">
-                  Загрузка 3D модели...
-                </p>
-              </div>
-            </Html>
-          }
-        >
-          <ShoeModel modelPath={modelPath} />
+        <Suspense fallback={<GlassLoader />}>
+          <ShoeModel scrollProgress={scrollProgress} />
 
-          {/* Окружение для рефлексов */}
           <Environment preset="city" />
 
-          {/* Эффект частиц */}
           <Sparkles
             count={30}
             scale={[5, 5, 5]}
@@ -173,14 +156,11 @@ export default function ThreeDShoe() {
           />
         </Suspense>
 
-        {/* Орбитальный контроль - зум отключен */}
         <OrbitControls
           enableZoom={false}
           enablePan={false}
           autoRotate={false}
-          maxPolarAngle={Math.PI / 2}
-          minPolarAngle={Math.PI / 4}
-          rotateSpeed={1.5}
+          enableRotate={false}
         />
       </Canvas>
     </div>

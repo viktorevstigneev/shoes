@@ -20,7 +20,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Закрываем мобильное меню при смене маршрута
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
@@ -38,11 +37,11 @@ export default function Navbar() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
           isScrolled
-            ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg"
-            : "bg-white dark:bg-gray-900"
-        }`}
+            ? "bg-white/10 dark:bg-black/10 backdrop-blur-2xl shadow-sm shadow-black/5"
+            : "bg-white/5 dark:bg-black/5 backdrop-blur-md"
+        } border-b border-white/10 dark:border-white/5`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           {/* Logo */}
@@ -54,23 +53,22 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex gap-8">
+          <div className="hidden md:flex gap-1">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative group transition-colors duration-200 ${
+                className={`relative px-4 py-2 rounded-xl transition-all duration-300 ${
                   pathname === link.href
-                    ? "text-black dark:text-white font-semibold"
-                    : "text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
+                    ? "bg-white/20 dark:bg-white/10 text-black dark:text-white font-semibold backdrop-blur-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-white/10 dark:hover:bg-white/5 hover:text-black dark:hover:text-white"
                 }`}
               >
                 {link.label}
-                {/* Active indicator */}
                 {pathname === link.href && (
                   <motion.span
                     layoutId="activeTab"
-                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-black dark:bg-white"
+                    className="absolute -bottom-1 left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-black/50 dark:via-white/50 to-transparent"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -79,9 +77,13 @@ export default function Navbar() {
           </div>
 
           {/* Right side buttons */}
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-1 items-center">
             {/* Search button */}
-            <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-2 rounded-xl hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
+            >
               <svg
                 className="w-5 h-5 text-gray-700 dark:text-gray-300"
                 fill="none"
@@ -95,10 +97,14 @@ export default function Navbar() {
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
-            </button>
+            </motion.button>
 
             {/* Cart button */}
-            <button className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative p-2 rounded-xl hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300 group"
+            >
               <svg
                 className="w-5 h-5 text-gray-700 dark:text-gray-300"
                 fill="none"
@@ -112,15 +118,15 @@ export default function Navbar() {
                   d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                 />
               </svg>
-              <span className="absolute -top-1 -right-1 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+              <span className="absolute -top-1 -right-1 bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
                 3
               </span>
-            </button>
+            </motion.button>
 
             {/* Theme Toggle Button */}
             <motion.button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-xl hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
               aria-label="Сменить тему"
               whileTap={{ scale: 0.9 }}
               whileHover={{ scale: 1.05 }}
@@ -168,7 +174,7 @@ export default function Navbar() {
 
             {/* Mobile menu button */}
             <motion.button
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="md:hidden p-2 rounded-xl hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               whileTap={{ scale: 0.95 }}
               aria-label="Меню"
@@ -180,12 +186,12 @@ export default function Navbar() {
                       ? { rotate: 45, y: 8 }
                       : { rotate: 0, y: 0 }
                   }
-                  className="absolute w-6 h-0.5 bg-gray-700 dark:bg-gray-300 top-1 left-0"
+                  className="absolute w-6 h-0.5 bg-gray-700 dark:bg-gray-300 top-1 left-0 rounded-full"
                   transition={{ duration: 0.2 }}
                 />
                 <motion.span
                   animate={isMobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                  className="absolute w-6 h-0.5 bg-gray-700 dark:bg-gray-300 top-2.5 left-0"
+                  className="absolute w-6 h-0.5 bg-gray-700 dark:bg-gray-300 top-2.5 left-0 rounded-full"
                   transition={{ duration: 0.2 }}
                 />
                 <motion.span
@@ -194,7 +200,7 @@ export default function Navbar() {
                       ? { rotate: -45, y: -8 }
                       : { rotate: 0, y: 0 }
                   }
-                  className="absolute w-6 h-0.5 bg-gray-700 dark:bg-gray-300 top-4 left-0"
+                  className="absolute w-6 h-0.5 bg-gray-700 dark:bg-gray-300 top-4 left-0 rounded-full"
                   transition={{ duration: 0.2 }}
                 />
               </div>
@@ -203,32 +209,32 @@ export default function Navbar() {
         </div>
       </motion.nav>
 
-      {/* Mobile menu overlay */}
+      {/* Mobile menu overlay with glass effect */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop with blur */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
             />
 
-            {/* Menu panel */}
+            {/* Menu panel with glass effect */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-900 shadow-xl z-50 md:hidden"
+              className="fixed right-0 top-0 bottom-0 w-80 bg-white/30 dark:bg-black/30 backdrop-blur-2xl shadow-2xl z-50 md:hidden border-l border-white/20 dark:border-white/10"
             >
               <div className="flex flex-col h-full">
-                <div className="flex justify-end p-4 border-b dark:border-gray-800">
+                <div className="flex justify-end p-4 border-b border-white/20 dark:border-white/10">
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                    className="p-2 rounded-xl hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
                   >
                     <svg
                       className="w-6 h-6 text-gray-700 dark:text-gray-300"
@@ -247,16 +253,16 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex-1 py-8 px-4">
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
                     {links.map((link) => (
                       <Link
                         key={link.href}
                         href={link.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`py-3 px-4 rounded-lg transition-colors ${
+                        className={`py-3 px-4 rounded-xl transition-all duration-300 ${
                           pathname === link.href
-                            ? "bg-black dark:bg-white text-white dark:text-black font-semibold"
-                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                            ? "bg-white/30 dark:bg-white/20 text-black dark:text-white font-semibold backdrop-blur-sm"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-white/20 dark:hover:bg-white/10"
                         }`}
                       >
                         {link.label}
@@ -265,9 +271,9 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                <div className="p-4 border-t dark:border-gray-800">
-                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                    © 2024 NEXUS KICKS
+                <div className="p-4 border-t border-white/20 dark:border-white/10">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    © 2024 J&V Sneakers
                   </div>
                 </div>
               </div>

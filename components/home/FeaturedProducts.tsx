@@ -5,6 +5,8 @@ import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { products } from "@/data/products";
+import { GlassButton } from "react-glass-ui";
+import { useTheme } from "@/context/ThemeContext";
 
 interface Product {
   id: number;
@@ -21,6 +23,8 @@ export default function FeaturedProducts() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   const featured = products.slice(0, 3);
+
+  const { theme } = useTheme();
 
   return (
     <section
@@ -66,29 +70,52 @@ export default function FeaturedProducts() {
         </div>
 
         {/* Кнопка "Смотреть все" */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.6 }}
-          className="text-center mt-16"
-        >
-          <Link
-            href="/catalog"
-            className="group inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold transition-all duration-300 bg-black text-white dark:bg-white dark:text-black hover:scale-105 hover:shadow-xl"
-          >
-            <span>Смотреть все кроссовки</span>
-            <motion.span
-              animate={{ x: [0, 5, 0] }}
-              transition={{
-                repeat: Infinity,
-                duration: 1.5,
-                ease: "easeInOut",
-              }}
+        <div className="text-center mt-16">
+          <Link href="/catalog">
+            <GlassButton
+              blur={17}
+              distortion={400}
+              flexibility={20}
+              borderColor={theme === "dark" ? "#ffffff" : "#000000"}
+              borderSize={1}
+              borderRadius={47}
+              borderOpacity={0.4}
+              backgroundColor={theme === "dark" ? "#000000" : "#ffffff"}
+              backgroundOpacity={0}
+              innerLightColor="#ffffff"
+              innerLightSpread={1}
+              innerLightBlur={10}
+              innerLightOpacity={0}
+              outerLightColor="#ffffff"
+              outerLightSpread={1}
+              outerLightBlur={10}
+              outerLightOpacity={0}
+              color={theme === "dark" ? "#ffffff" : "#000000"}
+              chromaticAberration={3.5}
+              onHoverScale={1.05}
+              saturation={250}
+              brightness={110}
+              className="transition-all duration-300"
             >
-              →
-            </motion.span>
+              <span className="flex items-center gap-2 px-6">
+                Смотреть все кроссовки
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </span>
+            </GlassButton>
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
