@@ -1,68 +1,94 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+import { useTheme } from "@/context/ThemeContext";
 
 interface Product {
   id: number;
   name: string;
-  brand: string;
   price: number;
+  brand: string;
   image: string;
+  category: string;
 }
 
-export default function ProductCard({ product }: { product: Product }) {
-  const [isHovered, setIsHovered] = useState(false);
+interface ProductCardProps {
+  product: Product;
+}
+
+export default function ProductCard({ product }: ProductCardProps) {
+  const { theme } = useTheme();
+  const isDarkTheme = theme === "dark";
 
   return (
-    <motion.div
-      whileHover={{ y: -8 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="group relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
-    >
-      <Link href={`/catalog/${product.id}`}>
-        {/* Блок с изображением */}
-        <div className="relative h-72 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-contain p-6 transition-transform duration-500 group-hover:scale-110"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+    <Link href={`/catalog/${product.id}`}>
+      <motion.div
+        whileHover="hover"
+        initial="initial"
+        className={`group relative rounded-3xl overflow-hidden cursor-pointer
+          ${
+            isDarkTheme
+              ? "backdrop-blur-xl bg-black/40 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+              : "bg-white border border-black/10 shadow-lg"
+          }
+        `}
+      >
+        {/* Изображение с тенью */}
+        <div
+          className={`relative overflow-hidden h-80 ${
+            isDarkTheme
+              ? "bg-gradient-to-br from-white/5 to-black/20"
+              : "bg-gradient-to-br from-gray-50 to-gray-100"
+          }`}
+        >
+          {/* Тень кроссовка */}
+          <div
+            className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3/4 h-20 rounded-full blur-xl z-0
+              ${isDarkTheme ? "bg-white/10" : "bg-black/15"}
+            `}
           />
 
-          {/* Тень под кроссовком */}
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3/4 h-16 bg-black/10 dark:bg-black/30 rounded-full blur-xl" />
-
-          {/* Затемнение при наведении */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isHovered ? 0.4 : 0 }}
-            className="absolute inset-0 bg-black z-10"
-          />
-
-          {/* Кнопка быстрого просмотра */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 20 }}
-            className="absolute bottom-4 left-4 right-4 z-20"
+            variants={{
+              initial: { scale: 1, y: 0 },
+              hover: { scale: 1.08, y: -8 },
+            }}
+            transition={{ duration: 0.5, type: "spring", stiffness: 300 }}
+            className="relative w-full h-full z-10"
           >
-            <button className="w-full bg-white text-gray-900 py-2.5 rounded-xl font-semibold hover:bg-gray-900 hover:text-white transition-all duration-300 text-sm">
-              Быстрый просмотр
-            </button>
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-contain p-8 drop-shadow-2xl"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
           </motion.div>
+
+          {/* Эффект блика при ховере */}
+          <motion.div
+            variants={{
+              initial: { opacity: 0, x: "-100%" },
+              hover: { opacity: 0.2, x: "100%" },
+            }}
+            transition={{ duration: 0.6 }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent skew-x-[-20deg]"
+          />
         </div>
 
-        {/* Контент */}
-        <div className="p-5">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        {/* Контент карточки */}
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-3">
+            <span
+              className={`text-xs font-medium tracking-wide uppercase ${
+                isDarkTheme ? "text-white/60" : "text-gray-500"
+              }`}
+            >
               {product.brand}
-            </p>
-            <div className="flex gap-0.5">
+            </span>
+            <div className="flex gap-1">
               {[...Array(5)].map((_, i) => (
                 <svg
                   key={i}
@@ -75,28 +101,57 @@ export default function ProductCard({ product }: { product: Product }) {
             </div>
           </div>
 
-          <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white line-clamp-1">
+          <h3
+            className={`text-lg font-semibold mb-2 line-clamp-1 ${
+              isDarkTheme ? "text-white" : "text-gray-900"
+            }`}
+          >
             {product.name}
           </h3>
 
+          <p
+            className={`text-sm mb-4 line-clamp-1 ${
+              isDarkTheme ? "text-white/50" : "text-gray-500"
+            }`}
+          >
+            {product.category || "Кроссовки"}
+          </p>
+
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span
+                className={`text-2xl font-bold ${
+                  isDarkTheme ? "text-white" : "text-gray-900"
+                }`}
+              >
                 {product.price.toLocaleString()} BYN
               </span>
             </div>
 
+            {/* Кнопка корзины */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-900 dark:hover:bg-white transition-colors group/btn"
+              className={`relative overflow-hidden group/btn p-2.5 rounded-xl transition-colors duration-300
+                ${
+                  isDarkTheme
+                    ? "bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                    : "bg-gray-100 hover:bg-black"
+                }
+              `}
               onClick={(e) => {
                 e.preventDefault();
                 console.log("Added to cart:", product.id);
               }}
             >
               <svg
-                className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover/btn:text-white dark:group-hover/btn:text-gray-900 transition-colors"
+                className={`w-5 h-5 transition-colors duration-300
+                  ${
+                    isDarkTheme
+                      ? "text-white/80 group-hover/btn:text-white"
+                      : "text-gray-600 group-hover/btn:text-white"
+                  }
+                `}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -111,7 +166,21 @@ export default function ProductCard({ product }: { product: Product }) {
             </motion.button>
           </div>
         </div>
-      </Link>
-    </motion.div>
+
+        {/* Анимированная линия */}
+        <motion.div
+          variants={{
+            initial: { scaleX: 0, originX: 0 },
+            hover: { scaleX: 1 },
+          }}
+          transition={{ duration: 0.4 }}
+          className={`absolute bottom-0 left-0 right-0 h-0.5 ${
+            isDarkTheme
+              ? "bg-gradient-to-r from-white/30 via-white to-white/30"
+              : "bg-gradient-to-r from-gray-700 to-gray-900"
+          }`}
+        />
+      </motion.div>
+    </Link>
   );
 }

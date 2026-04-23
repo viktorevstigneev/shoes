@@ -30,7 +30,7 @@ export default function ProductCard({ product, isHovered }: ProductCardProps) {
           ${
             isDarkTheme
               ? "backdrop-blur-xl bg-white/10 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-              : "bg-white dark:bg-gray-800"
+              : "bg-white dark:bg-gray-800 border border-black/20"
           }
         `}
       >

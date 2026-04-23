@@ -71,7 +71,7 @@ export default function Features() {
                 distortion={10}
                 flexibility={20}
                 borderColor={theme === "dark" ? "#ffffff" : "#000000"}
-                borderSize={0}
+                borderSize={1}
                 borderRadius={20}
                 borderOpacity={0.4}
                 backgroundColor={theme === "dark" ? "#000000" : "#ffffff"}
@@ -90,7 +90,9 @@ export default function Features() {
                 saturation={250}
                 brightness={100}
                 padding="24px"
-                className="transition-all duration-300"
+                className="transition-all duration-300 w-full"
+                // @ts-ignore
+                width={"100%"}
               >
                 {/* SVG иконка */}
                 <div
