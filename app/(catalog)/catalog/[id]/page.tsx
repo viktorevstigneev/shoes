@@ -1,22 +1,33 @@
+// app/catalog/[id]/page.tsx
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { products } from "@/data/products";
+import { supabase } from "@/lib/supabase";
 
-// Простая синхронная функция
-function getProductById(id: string) {
-  return products.find((p) => p.id === Number(id));
+// Получаем товар по ID из БД
+async function getProductById(id: string) {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", Number(id))
+    .single();
+
+  if (error) {
+    console.error("Error fetching product:", error);
+    return null;
+  }
+
+  return data;
 }
 
-// SSR - генерация метаданных (params теперь асинхронный)
+// Генерация метаданных
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Разворачиваем Promise params
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getProductById(id);
 
   if (!product) {
     return {
@@ -24,46 +35,45 @@ export async function generateMetadata({
     };
   }
 
-  // ЖЕСТКО ЗАДАЁМ ДОМЕН - без всяких условий и проверок
-  const fullImageUrl = `https://jandv-sneakers.onrender.com${product.image}`;
-
   return {
     title: `${product.name} | J&V Sneakers`,
-    description: product.description,
+    description: product.description || "Кроссовки в нашем магазине",
     openGraph: {
       title: product.name,
       description: product.description,
-      images: [fullImageUrl],
+      images: [product.image],
     },
   };
 }
 
-// SSR - страница товара (params тоже асинхронный)
+// Страница товара
 export default async function ProductPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Разворачиваем Promise params
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getProductById(id);
 
   if (!product) {
     notFound();
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-black pt-24 pb-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Хлебные крошки */}
         <div className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-          <Link href="/" className="hover:text-gray-900 dark:hover:text-white">
+          <Link
+            href="/"
+            className="hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
             Главная
           </Link>
           {" / "}
           <Link
             href="/catalog"
-            className="hover:text-gray-900 dark:hover:text-white"
+            className="hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             Каталог
           </Link>
@@ -71,7 +81,7 @@ export default async function ProductPage({
           <span className="text-gray-900 dark:text-white">{product.name}</span>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-8">
           {/* Левая часть - изображение */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg">
             <div className="relative h-96 w-full">
@@ -115,7 +125,7 @@ export default async function ProductPage({
 
             <div className="border-t border-b border-gray-200 dark:border-gray-800 py-6">
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                {product.description}
+                {product.description || "Нет описания"}
               </p>
             </div>
 
@@ -137,7 +147,7 @@ export default async function ProductPage({
             <div className="space-y-3 pt-4">
               <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <svg
-                  className="w-5 h-5"
+                  className="w-5 h-5 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -145,7 +155,7 @@ export default async function ProductPage({
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
@@ -153,7 +163,7 @@ export default async function ProductPage({
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <svg
-                  className="w-5 h-5"
+                  className="w-5 h-5 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -161,7 +171,7 @@ export default async function ProductPage({
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
@@ -169,7 +179,7 @@ export default async function ProductPage({
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <svg
-                  className="w-5 h-5"
+                  className="w-5 h-5 text-green-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -177,7 +187,7 @@ export default async function ProductPage({
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     d="M5 13l4 4L19 7"
                   />
                 </svg>

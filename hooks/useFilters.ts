@@ -1,12 +1,41 @@
-import { useState, useMemo } from "react";
-import { products } from "@/data/products";
+import { useState, useMemo, useEffect } from "react";
 import { PriceRange, priceRanges } from "@/data/filterConstants";
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  brand: string;
+  image: string;
+  category: string;
+  description?: string;
+  created_at?: string;
+}
 
 export function useFilters() {
   const [selectedBrand, setSelectedBrand] = useState("Все");
   const [selectedPrice, setSelectedPrice] = useState<PriceRange>(
     priceRanges[0],
   );
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Загружаем товары из API
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch("/api/products");
+      const data = await response.json();
+      setProducts(data.products || []);
+    } catch (error) {
+      console.error("Error loading products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -17,7 +46,7 @@ export function useFilters() {
         product.price <= selectedPrice.max;
       return brandMatch && priceMatch;
     });
-  }, [selectedBrand, selectedPrice]);
+  }, [products, selectedBrand, selectedPrice]);
 
   const resetFilters = () => {
     setSelectedBrand("Все");
@@ -35,5 +64,6 @@ export function useFilters() {
     filteredProducts,
     resetFilters,
     hasActiveFilters,
+    loading,
   };
 }
