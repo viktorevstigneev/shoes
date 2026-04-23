@@ -3,7 +3,6 @@
 import { useRef, Suspense, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
-  OrbitControls,
   Environment,
   useGLTF,
   PerspectiveCamera,
@@ -23,23 +22,32 @@ function ShoeModel({ scrollProgress = 0 }) {
   // Клонируем сцену
   const clonedScene = scene.clone();
 
-  useFrame((state) => {
+  useFrame(() => {
     if (groupRef.current) {
-      // Вращение от скролла
-      const rotationY = scrollProgress * Math.PI * 2;
-      groupRef.current.rotation.y = rotationY + Math.PI; // + Math.PI это 180 градусов
+      // При скролле от 0 до 1:
+      // - позиция Y меняется от 3 (вверху) до 0 (на земле)
+      // - вращение X меняется от наклона к горизонтали
 
-      // Наклон от скролла
-      groupRef.current.rotation.x = Math.sin(scrollProgress * Math.PI) * 0.2;
+      // Падение вниз: startY=3, endY=0
+      const targetY = 3 - scrollProgress * 3;
+      // Наклон при падении: от 0.8 до 0
+      const targetRotX = (2 - scrollProgress) * 0.8;
+      const targetRotZ = (0.1 - scrollProgress) * 3;
 
-      // Плавное движение вверх-вниз
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.05;
+      groupRef.current.position.y = targetY;
+      groupRef.current.rotation.x = targetRotX;
+      groupRef.current.rotation.z = targetRotZ;
+
+      // Вращение по Y для красоты
+      groupRef.current.rotation.y = scrollProgress * Math.PI;
+      groupRef.current.rotation.x = scrollProgress * Math.PI*2;
+      // groupRef.current.rotation.z = scrollProgress * Math.PI;
     }
   });
 
   return (
-    <group ref={groupRef}>
-      <primitive object={clonedScene} scale={2.8} />
+    <group ref={groupRef} position={[0, 3, 0]} rotation={[0.8, 0, 0]}>
+      <primitive object={clonedScene} scale={2.5} />
     </group>
   );
 }
@@ -87,12 +95,12 @@ export default function ThreeDShoe() {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const maxScroll = document.body.scrollHeight - window.innerHeight;
-      const progress = maxScroll > 0 ? scrollY / maxScroll : 0;
+      const progress = maxScroll > 0 ? Math.min(scrollY / maxScroll, 1) : 0;
       setScrollProgress(progress);
     };
 
     window.addEventListener("scroll", handleScroll);
-    handleScroll(); // Вызываем сразу для начального значения
+    handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -101,45 +109,56 @@ export default function ThreeDShoe() {
   useGLTF.preload("/shoes/n2.glb");
 
   return (
-    <div className="w-full h-[500px] md:h-[600px] relative">
+    <div className="w-full h-full relative">
       <Canvas
         style={{ width: "100%", height: "100%" }}
         shadows={{ type: THREE.PCFShadowMap }}
-        camera={{ position: [5, 3, 8], fov: 45 }}
-        className="cursor-grab active:cursor-grabbing"
+        camera={{ position: [0, 5, 5], fov: 45 }}
         gl={{ preserveDrawingBuffer: true }}
       >
-        <PerspectiveCamera makeDefault position={[5, 3, 8]} />
+        {/* Камера сверху-спереди - смотрим на кроссовок сверху вниз */}
+        <PerspectiveCamera makeDefault position={[0, 2, 8]} fov={50} />
 
         {/* Освещение */}
-        <ambientLight intensity={theme === "light" ? 0.7 : 0.4} />
+        <ambientLight intensity={theme === "light" ? 0.6 : 0.3} />
 
+        {/* Основной свет сверху */}
         <directionalLight
-          position={[5, 5, 5]}
-          intensity={1.2}
+          position={[0, 8, 2]}
+          intensity={1.5}
           castShadow
           shadow-mapSize={{ width: 1024, height: 1024 }}
         />
 
+        {/* Заполняющий свет спереди */}
+        <directionalLight
+          position={[0, 2, 5]}
+          intensity={0.6}
+          color={theme === "light" ? "#ffffff" : "#8B5CF6"}
+        />
+
+        {/* Контровый свет сзади */}
+        <pointLight
+          position={[0, 3, -4]}
+          intensity={0.5}
+          color={theme === "light" ? "#FBBF24" : "#EC4899"}
+        />
+
+        {/* Боковые акценты */}
         <pointLight
           position={[-3, 4, 2]}
-          intensity={0.8}
-          color={theme === "light" ? "#8B5CF6" : "#6366F1"}
-        />
-
-        <pointLight
-          position={[3, 2, 4]}
-          intensity={0.8}
-          color={theme === "light" ? "#EC4899" : "#EC4899"}
-        />
-
-        <pointLight
-          position={[0, 1, -3]}
           intensity={0.5}
-          color={theme === "light" ? "#3B82F6" : "#60A5FA"}
+          color={theme === "light" ? "#3B82F6" : "#6366F1"}
         />
 
-        <pointLight position={[0, -2, 0]} intensity={0.4} color="#FBBF24" />
+        <pointLight
+          position={[3, 4, 2]}
+          intensity={0.5}
+          color={theme === "light" ? "#EC4899" : "#A78BFA"}
+        />
+
+        {/* Свет снизу для бликов */}
+        <pointLight position={[0, -2, 0]} intensity={0.3} color="#FBBF24" />
 
         {/* 3D Модель с загрузкой */}
         <Suspense fallback={<GlassLoader />}>
@@ -149,19 +168,12 @@ export default function ThreeDShoe() {
 
           <Sparkles
             count={30}
-            scale={[5, 5, 5]}
-            size={0.3}
+            scale={[6, 6, 6]}
+            size={0.2}
             color={theme === "light" ? "#8B5CF6" : "#A78BFA"}
             opacity={0.3}
           />
         </Suspense>
-
-        <OrbitControls
-          enableZoom={false}
-          enablePan={false}
-          autoRotate={false}
-          enableRotate={false}
-        />
       </Canvas>
     </div>
   );

@@ -32,30 +32,6 @@ export default function Features() {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Фон с размытыми кругами */}
-      <div className="absolute inset-0 -z-10">
-        <div
-          className={`absolute inset-0 ${
-            theme === "dark" ? "bg-gray-950" : "bg-gray-100"
-          }`}
-        />
-
-        {/* Размытые круги */}
-        {theme === "dark" ? (
-          <>
-            <div className="absolute top-20 -left-20 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 -right-20 w-96 h-96 bg-white/15 rounded-full blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-          </>
-        ) : (
-          <>
-            <div className="absolute top-20 -left-20 w-96 h-96 bg-gray-400/20 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 -right-20 w-96 h-96 bg-gray-500/15 rounded-full blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gray-400/10 rounded-full blur-3xl" />
-          </>
-        )}
-      </div>
-
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -91,8 +67,8 @@ export default function Features() {
               whileHover={{ y: -4 }}
             >
               <GlassCard
-                blur={17}
-                distortion={400}
+                blur={78}
+                distortion={10}
                 flexibility={20}
                 borderColor={theme === "dark" ? "#ffffff" : "#000000"}
                 borderSize={0}

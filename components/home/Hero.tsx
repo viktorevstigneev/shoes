@@ -12,37 +12,38 @@ export default function Hero() {
 
   const backgroundImages = {
     light: {
-      main: "/bg22.png",
-      overlay: "",
+      main: "/3dBg222.png",
     },
     dark: {
-      main: "/bg.jpg",
-      overlay: "",
+      main: "/3dBg1.png",
     },
   };
 
   const currentBg =
     theme === "light" ? backgroundImages.light : backgroundImages.dark;
+  const is3DTheme = theme === "dark";
 
   return (
-    <div ref={ref} className="relative min-h-screen overflow-hidden pt-10">
-      {/* Фоновое изображение */}
-      <div className="absolute inset-0">
-        <img
-          src={currentBg.main}
-          alt="Hero background"
-          className="w-full h-full object-cover"
-        />
-      </div>
+    <div
+      ref={ref}
+      className="relative min-h-screen overflow-hidden"
+      style={{
+        backgroundImage: `url(${currentBg.main})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        // backgroundAttachment: "fixed",
+      }}
+    >
+      {/* Слой с 3D кроссовками на фоне — показываем только для dark темы (3D) */}
+      {is3DTheme && (
+        <div className="absolute inset-0 pointer-events-none">
+          <ThreeDShoe />
+        </div>
+      )}
 
-      {/* Стекломорфный оверлей на фон */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/10 z-10" />
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px] z-10" />
-
-      <div className={`absolute inset-0 z-20 ${currentBg.overlay}`} />
-
-      {/* Основной контент */}
-      <div className="relative z-30 min-h-screen flex items-center">
+      {/* Основной контент поверх всего */}
+      <div className="relative z-10 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Левая часть с текстом */}
@@ -56,10 +57,9 @@ export default function Hero() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
-                {/* Кнопка "В каталог" с GlassButton */}
                 <Link href="/catalog" className="block sm:w-[200px] w-full">
                   <GlassButton
-                    blur={12}
+                    blur={1}
                     distortion={15}
                     flexibility={25}
                     borderRadius={40}
@@ -89,10 +89,9 @@ export default function Hero() {
                   </GlassButton>
                 </Link>
 
-                {/* Кнопка "Узнать больше" с GlassButton */}
                 <Link href="/about" className="block sm:w-[200px] w-full">
                   <GlassButton
-                    blur={8}
+                    blur={1}
                     distortion={8}
                     flexibility={20}
                     borderRadius={40}
@@ -137,8 +136,8 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* Правая часть с 3D */}
-            <ThreeDShoe />
+            {/* Правая часть пустая */}
+            <div className="hidden lg:block" />
           </div>
         </div>
       </div>

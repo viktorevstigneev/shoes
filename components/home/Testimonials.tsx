@@ -86,8 +86,8 @@ export default function Testimonials() {
               whileHover={{ y: -4 }}
             >
               <GlassCard
-                blur={17}
-                distortion={400}
+                blur={77}
+                distortion={40}
                 flexibility={20}
                 borderColor={theme === "dark" ? "#ffffff" : "#000000"}
                 borderSize={0}
